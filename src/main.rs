@@ -1,5 +1,5 @@
-use iced::widget::{button, row, container, Row, Column, column};
-use iced::{Alignment, Element};
+use iced::widget::{button, row, container, Column};
+use iced::{Element,Theme,Fill};
 use std::process::{Command, Stdio};
 
 #[derive(Default, Clone)]
@@ -21,7 +21,7 @@ enum Message {
 }
 
 fn main() -> iced::Result {
-    iced::run("Tiny E-reader", Mode::update, Mode::view)
+    iced::application("Tiny E-reader", Mode::update, Mode::view).theme(|_| Theme::Dracula).run()
 }
 
 impl Mode {
@@ -44,9 +44,10 @@ impl Mode {
     }
 
     fn view_menu(&self) -> Element<Message> {
-        row![button("Books").on_press(Message::Books),button("Visual Novels").on_press(Message::Vns)]
-            .padding(20)
-            .align_y(Alignment::Center)
+        container(row![button("Books").on_press(Message::Books).height(Fill).width(Fill),button("Visual Novels").on_press(Message::Vns).height(Fill).width(Fill)]
+            .padding(20))
+            .center_x(Fill)
+            .center_y(Fill)
             .into()
     }
 
@@ -66,15 +67,13 @@ impl Mode {
         let book_list: Vec<&str> = books.lines().collect();
     
         let mut columns = Column::new().spacing(10);
-        
+        columns = columns.push(button("Menu").on_press(Message::Menu));
         for &book in &book_list {
             columns = columns.push(
                 button(book)
                     .on_press(Message::OpenBook(book.to_string()))
             );
         }
-        
-        columns = columns.push(button("Menu").on_press(Message::Menu));
         columns.into()
     }
 
@@ -91,13 +90,12 @@ impl Mode {
         let vns: &'static str = Box::leak(vns_str);
         let vn_list: Vec<&str> = vns.lines().collect();
 
-        let mut rows = Row::new().spacing(10);
-
+        let mut columns = Column::new().spacing(10);
+        columns = columns.push(button("Menu").on_press(Message::Menu));
         for &vn in &vn_list {
-            rows = rows.push(button(vn).on_press(Message::OpenVn(vn.to_string())));
+            columns = columns.push(button(vn).on_press(Message::OpenVn(vn.to_string())));
         }
-        rows = rows.push(button("Menu").on_press(Message::Menu));
-        rows.into()
+        columns.into()
 
     }
     
